@@ -19,20 +19,6 @@ router.route('/profile')
 
 router.get('/transactions', protect, getMyTransactions);
 
-// Test routes
-router.get('/simple-test', (req, res) => {
-  res.json({ message: 'Simple test working' });
-});
-
-router.get('/auth-test', protect, (req, res) => {
-  res.json({ message: 'Auth test working', user: req.user.firstName });
-});
-
-// Admin routes
-router.get('/test', protect, admin, (req, res) => {
-  res.json({ message: 'Test route working' });
-});
-
 router.get('/stats', protect, admin, getDashboardStats);
 
 router.get('/dashboard/stats', protect, admin, getDashboardStats);
