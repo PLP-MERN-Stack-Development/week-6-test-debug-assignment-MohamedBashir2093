@@ -51,14 +51,14 @@ Before running this application, make sure you have the following installed:
 
 ### 1. Clone the Repository
 
-\`\`\`bash
+```bash
 git clone <repository-url>
 cd library-management-system
-\`\`\`
+```
 
 ### 2. Backend Setup
 
-\`\`\`bash
+```bash
 # Navigate to backend directory
 cd backend
 
@@ -76,7 +76,7 @@ cp .env.example .env
 
 # Start the backend server
 npm start
-\`\`\`
+```
 
 The backend server will start on http://localhost:5000
 
@@ -84,7 +84,7 @@ The backend server will start on http://localhost:5000
 
 Open a new terminal window:
 
-\`\`\`bash
+```bash
 # Navigate to frontend directory
 cd frontend
 
@@ -98,7 +98,7 @@ npm install
 
 # Start the frontend development server
 npm run dev
-\`\`\`
+```
 
 The frontend development server will start on http://localhost:5173
 
@@ -106,13 +106,13 @@ The frontend development server will start on http://localhost:5173
 
 If you're using local MongoDB:
 
-\`\`\`bash
+```bash
 # Start MongoDB service (Ubuntu/Debian)
 sudo systemctl start mongod
 
 # Or using MongoDB directly
 mongod
-\`\`\`
+```
 
 For MongoDB Atlas:
 1. Create a cluster on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
@@ -133,7 +133,7 @@ The application includes demo accounts for testing:
 
 ## Project Structure
 
-\`\`\`
+```
 library-management-system/
 ├── backend/
 │   ├── controllers/         # Route controllers
@@ -156,7 +156,7 @@ library-management-system/
 │   ├── tailwind.config.js
 │   └── vite.config.js
 └── README.md
-\`\`\`
+```
 
 ## API Endpoints
 
@@ -192,7 +192,7 @@ library-management-system/
 
 ### Backend Development
 
-\`\`\`bash
+```bash
 cd backend
 
 # Run in development mode with auto-restart
@@ -200,11 +200,11 @@ npm run dev
 
 # Run in production mode
 npm start
-\`\`\`
+```
 
 ### Frontend Development
 
-\`\`\`bash
+```bash
 cd frontend
 
 # Start development server
@@ -218,7 +218,7 @@ npm run preview
 
 # Run linting
 npm run lint
-\`\`\`
+```
 
 ## Styling with Tailwind CSS
 
@@ -232,7 +232,7 @@ This project uses Tailwind CSS v3.4.17 with a custom configuration:
 
 ### Custom CSS Classes
 
-\`\`\`css
+```css
 /* Buttons */
 .btn-primary    /* Primary button styling */
 .btn-secondary  /* Secondary button styling */
@@ -240,7 +240,7 @@ This project uses Tailwind CSS v3.4.17 with a custom configuration:
 /* Components */
 .card          /* Card container styling */
 .input         /* Form input styling */
-\`\`\`
+```
 
 ## Features in Detail
 
@@ -275,28 +275,28 @@ This project uses Tailwind CSS v3.4.17 with a custom configuration:
 Create production environment files:
 
 **Backend (.env)**
-\`\`\`
+```
 PORT=5000
 MONGODB_URI=your-production-mongodb-uri
 JWT_SECRET=super-secure-production-jwt-secret
 NODE_ENV=production
-\`\`\`
+```
 
 **Frontend (.env)**
-\`\`\`
+```
 VITE_API_URL=https://your-backend-domain.com/api
 VITE_APP_NAME=Library Management System
-\`\`\`
+```
 
 ### Build Commands
 
-\`\`\`bash
+```bash
 # Build frontend for production
 cd frontend && npm run build
 
 # Start backend in production
 cd backend && npm start
-\`\`\`
+```
 
 ## Contributing
 
