@@ -53,7 +53,7 @@ Before running this application, make sure you have the following installed:
 
 ```bash
 git clone https://github.com/PLP-MERN-Stack-Development/libraryMS.git
-cd library-management-system
+cd libraryMS
 ```
 
 ### 2. Backend Setup
