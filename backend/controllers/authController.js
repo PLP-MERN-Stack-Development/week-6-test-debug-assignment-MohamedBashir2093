@@ -15,6 +15,10 @@ const register = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    if(!email || !email.match(/^\S+@\S+\.\S+$/)){
+      return res.status(400).json({ message: 'invalid email format'});
+    }
+
     // Create user
     const user = await User.create({
       username,

@@ -9,28 +9,42 @@ const Login = () => {
     email: '',
     password: '',
   });
+  const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const validationErrors = {};
+    if (!formData.email.trim()) validationErrors.email = 'Email is required';
+    if (!formData.password.trim()) validationErrors.password = 'Password is required';
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setErrors({});
     setLoading(true);
-    
+
     const result = await login(formData.email, formData.password);
-    
+
+    setLoading(false);
     if (result.success) {
       navigate('/dashboard');
+    } else {
+      setErrors({ form: result.message || 'Login failed. Please try again.' });
     }
-    setLoading(false);
   };
 
   return (
@@ -43,17 +57,13 @@ const Login = () => {
               <Library className="w-8 h-8 text-white" />
             </div>
           </div>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            Welcome back
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Sign in to your library account
-          </p>
+          <h2 className="mt-6 text-3xl font-bold text-gray-900">Welcome back</h2>
+          <p className="mt-2 text-sm text-gray-600">Sign in to your library account</p>
         </div>
 
         {/* Form */}
         <div className="bg-white rounded-xl shadow-lg p-8">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit} noValidate>
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -68,13 +78,13 @@ const Login = () => {
                   name="email"
                   type="email"
                   autoComplete="email"
-                  required
                   className="input pl-10"
                   placeholder="Enter your email"
                   value={formData.email}
                   onChange={handleChange}
                 />
               </div>
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
             </div>
 
             {/* Password */}
@@ -91,7 +101,6 @@ const Login = () => {
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
-                  required
                   className="input pl-10 pr-10"
                   placeholder="Enter your password"
                   value={formData.password}
@@ -109,7 +118,11 @@ const Login = () => {
                   )}
                 </button>
               </div>
+              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
             </div>
+
+            {/* General form error */}
+            {errors.form && <p className="text-red-600 text-sm">{errors.form}</p>}
 
             {/* Submit Button */}
             <div>
@@ -118,11 +131,7 @@ const Login = () => {
                 disabled={loading}
                 className="btn-primary w-full flex items-center justify-center h-12 text-base"
               >
-                {loading ? (
-                  <LoadingSpinner size="small" />
-                ) : (
-                  'Sign in'
-                )}
+                {loading ? <LoadingSpinner size="small" /> : 'Sign in'}
               </button>
             </div>
 
@@ -130,8 +139,12 @@ const Login = () => {
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-sm font-medium text-gray-700 mb-2">Demo Accounts:</p>
               <div className="text-xs text-gray-600 space-y-1">
-                <p><strong>Admin:</strong> admin@library.com / admin123</p>
-                <p><strong>User:</strong> user@library.com / user123</p>
+                <p>
+                  <strong>Admin:</strong> admin@library.com / admin123
+                </p>
+                <p>
+                  <strong>User:</strong> user@library.com / user123
+                </p>
               </div>
             </div>
           </form>
@@ -140,8 +153,8 @@ const Login = () => {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <Link 
-                to="/register" 
+              <Link
+                to="/register"
                 className="font-medium text-primary-600 hover:text-primary-500 transition-colors"
               >
                 Create one here
@@ -152,13 +165,11 @@ const Login = () => {
 
         {/* Footer text */}
         <div className="text-center">
-          <p className="text-xs text-gray-500">
-            Library Management System © 2025
-          </p>
+          <p className="text-xs text-gray-500">Library Management System © 2025</p>
         </div>
       </div>
     </div>
   );
 };
 
-export default Login; 
+export default Login;

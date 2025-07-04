@@ -111,7 +111,8 @@ const Books = () => {
     try {
       await booksAPI.createBook(addBookFormData);
       toast.success('Book added successfully!');
-      setShowAddModal(false);
+      
+      // Reset form and close modal
       setAddBookFormData({
         title: '',
         author: '',
@@ -123,6 +124,7 @@ const Books = () => {
           availableCopies: 1
         }
       });
+      setShowAddModal(false);
       fetchBooks();
     } catch (error) {
       const message = error.response?.data?.message || 'Failed to add book';
@@ -388,76 +390,165 @@ const Books = () => {
   const AddBookModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
+    const handleBackdropClick = (e) => {
+      if (e.target === e.currentTarget) {
+        handleCloseModal();
+      }
+    };
+
+    const handleCloseModal = () => {
+      setAddBookFormData({
+        title: '',
+        author: '',
+        genre: '',
+        isbn: '',
+        description: '',
+        availability: {
+          totalCopies: 1,
+          availableCopies: 1
+        }
+      });
+      onClose();
+    };
+
+    const handleInputChange = (field, value) => {
+      setAddBookFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleAvailabilityChange = (field, value) => {
+      setAddBookFormData(prev => ({
+        ...prev,
+        availability: {
+          ...prev.availability,
+          [field]: value
+        }
+      }));
+    };
+
+    const handleFormSubmit = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      handleCreateBook(e);
+    };
+
+    // Handle escape key and initial focus
+    React.useEffect(() => {
+      if (!isOpen) return;
+
+      const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+          handleCloseModal();
+        }
+      };
+
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+
+      return () => {
+        document.removeEventListener('keydown', handleEscape);
+        document.body.style.overflow = 'unset';
+      };
+    }, [isOpen]);
+
+    // Focus title input only when modal is first opened
+    React.useEffect(() => {
+      if (isOpen) {
+        const timer = setTimeout(() => {
+          const titleInput = document.querySelector('input[name="book-title"]');
+          if (titleInput) {
+            titleInput.focus();
+          }
+        }, 100);
+
+        return () => clearTimeout(timer);
+      }
+    }, [isOpen]);
+
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex items-center justify-center min-h-screen px-4">
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={onClose} />
+          <div 
+            className="fixed inset-0 bg-gray-600 bg-opacity-75" 
+            onClick={handleBackdropClick}
+          />
           
           <div className="relative bg-white rounded-lg max-w-md w-full p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Add New Book</h2>
             
-            <form onSubmit={handleCreateBook} className="space-y-4">
+            <form onSubmit={handleFormSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="book-title" className="block text-sm font-medium text-gray-700 mb-1">
                   Title *
                 </label>
                 <input
+                  id="book-title"
+                  name="book-title"
                   type="text"
                   value={addBookFormData.title}
-                  onChange={(e) => setAddBookFormData(prev => ({ ...prev, title: e.target.value }))}
-                  className="input"
+                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Enter book title"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="book-author" className="block text-sm font-medium text-gray-700 mb-1">
                   Author *
                 </label>
                 <input
+                  id="book-author"
+                  name="book-author"
                   type="text"
                   value={addBookFormData.author}
-                  onChange={(e) => setAddBookFormData(prev => ({ ...prev, author: e.target.value }))}
-                  className="input"
+                  onChange={(e) => handleInputChange('author', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Enter author name"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="book-genre" className="block text-sm font-medium text-gray-700 mb-1">
                     Genre
                   </label>
                   <input
+                    id="book-genre"
+                    name="book-genre"
                     type="text"
                     value={addBookFormData.genre}
-                    onChange={(e) => setAddBookFormData(prev => ({ ...prev, genre: e.target.value }))}
-                    className="input"
+                    onChange={(e) => handleInputChange('genre', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                     placeholder="e.g. Fiction"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="book-isbn" className="block text-sm font-medium text-gray-700 mb-1">
                     ISBN
                   </label>
                   <input
+                    id="book-isbn"
+                    name="book-isbn"
                     type="text"
                     value={addBookFormData.isbn}
-                    onChange={(e) => setAddBookFormData(prev => ({ ...prev, isbn: e.target.value }))}
-                    className="input"
+                    onChange={(e) => handleInputChange('isbn', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                     placeholder="e.g. 978-0-123456-78-9"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="book-description" className="block text-sm font-medium text-gray-700 mb-1">
                   Description
                 </label>
                 <textarea
+                  id="book-description"
+                  name="book-description"
                   value={addBookFormData.description}
-                  onChange={(e) => setAddBookFormData(prev => ({ ...prev, description: e.target.value }))}
-                  className="input"
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                   rows={3}
                   placeholder="Brief description of the book..."
                 />
@@ -465,55 +556,57 @@ const Books = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="book-total-copies" className="block text-sm font-medium text-gray-700 mb-1">
                     Total Copies *
                   </label>
                   <input
+                    id="book-total-copies"
+                    name="book-total-copies"
                     type="number"
                     min="1"
                     value={addBookFormData.availability.totalCopies}
                     onChange={(e) => {
                       const total = parseInt(e.target.value) || 1;
-                      setAddBookFormData(prev => ({ 
-                        ...prev, 
-                        availability: { 
-                          ...prev.availability, 
-                          totalCopies: total,
-                          availableCopies: total // Set available copies to total when changing total
-                        } 
-                      }));
+                      handleAvailabilityChange('totalCopies', total);
+                      // Adjust available copies if needed
+                      if (addBookFormData.availability.availableCopies > total) {
+                        handleAvailabilityChange('availableCopies', total);
+                      }
                     }}
-                    className="input"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="book-available-copies" className="block text-sm font-medium text-gray-700 mb-1">
                     Available Copies *
                   </label>
                   <input
+                    id="book-available-copies"
+                    name="book-available-copies"
                     type="number"
                     min="0"
                     max={addBookFormData.availability.totalCopies}
                     value={addBookFormData.availability.availableCopies}
-                    onChange={(e) => setAddBookFormData(prev => ({ 
-                      ...prev, 
-                      availability: { 
-                        ...prev.availability, 
-                        availableCopies: parseInt(e.target.value) || 0 
-                      } 
-                    }))}
-                    className="input"
+                    onChange={(e) => handleAvailabilityChange('availableCopies', parseInt(e.target.value) || 0)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                     required
                   />
                 </div>
               </div>
 
               <div className="flex justify-end space-x-2 mt-6">
-                <button type="button" onClick={onClose} className="btn-secondary">
+                <button 
+                  type="button" 
+                  onClick={handleCloseModal} 
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                >
                   Cancel
                 </button>
-                <button type="submit" className="btn-primary">
+                <button 
+                  type="submit" 
+                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                >
                   Add Book
                 </button>
               </div>
