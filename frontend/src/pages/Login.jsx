@@ -153,7 +153,7 @@ const Login = () => {
         {/* Footer text */}
         <div className="text-center">
           <p className="text-xs text-gray-500">
-            Library Management System © 2024
+            Library Management System © 2025
           </p>
         </div>
       </div>
