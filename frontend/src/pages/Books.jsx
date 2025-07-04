@@ -11,7 +11,9 @@ import {
   Star,
   Calendar,
   User,
-  Eye
+  Eye,
+  Edit3,
+  Trash2
 } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
@@ -27,6 +29,18 @@ const Books = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    title: '',
+    author: '',
+    genre: '',
+    isbn: '',
+    description: '',
+    availability: {
+      totalCopies: 1,
+      availableCopies: 1
+    }
+  });
   const [addBookFormData, setAddBookFormData] = useState({
     title: '',
     author: '',
@@ -116,6 +130,48 @@ const Books = () => {
     }
   };
 
+  const handleEditBook = (book) => {
+    setEditFormData({
+      title: book.title,
+      author: book.author,
+      genre: book.genre,
+      isbn: book.isbn,
+      description: book.description,
+      availability: {
+        totalCopies: book.availability?.totalCopies || 1,
+        availableCopies: book.availability?.availableCopies || 1
+      }
+    });
+    setSelectedBook(book);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateBook = async (e) => {
+    e.preventDefault();
+    try {
+      await booksAPI.updateBook(selectedBook._id, editFormData);
+      toast.success('Book updated successfully!');
+      setShowEditModal(false);
+      fetchBooks();
+    } catch (error) {
+      const message = error.response?.data?.message || 'Failed to update book';
+      toast.error(message);
+    }
+  };
+
+  const handleDeleteBook = async (book) => {
+    if (window.confirm(`Are you sure you want to delete "${book.title}"? This action cannot be undone.`)) {
+      try {
+        await booksAPI.deleteBook(book._id);
+        toast.success('Book deleted successfully!');
+        fetchBooks();
+      } catch (error) {
+        const message = error.response?.data?.message || 'Failed to delete book';
+        toast.error(message);
+      }
+    }
+  };
+
   const BookCard = ({ book }) => (
     <div className="card hover:shadow-lg transition-all duration-200 group">
       <div className="aspect-w-3 aspect-h-4 mb-4">
@@ -182,13 +238,30 @@ const Books = () => {
             <span>Details</span>
           </button>
           
-          {!isAdmin && book.availability?.availableCopies > 0 && (
-            <button 
-              onClick={() => handleRequestBook(book._id)}
-              className="flex-1 btn-primary text-sm py-2"
-            >
-              Request
-            </button>
+          {isAdmin ? (
+            <>
+              <button 
+                onClick={() => handleEditBook(book)}
+                className="btn-secondary text-sm py-2 px-3 flex items-center justify-center"
+              >
+                <Edit3 className="h-4 w-4" />
+              </button>
+              <button 
+                onClick={() => handleDeleteBook(book)}
+                className="btn-secondary text-sm py-2 px-3 flex items-center justify-center text-red-600 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </>
+          ) : (
+            book.availability?.availableCopies > 0 && (
+              <button 
+                onClick={() => handleRequestBook(book._id)}
+                className="flex-1 btn-primary text-sm py-2"
+              >
+                Request
+              </button>
+            )
           )}
         </div>
       </div>
@@ -451,6 +524,144 @@ const Books = () => {
     );
   };
 
+  const EditBookModal = ({ book, isOpen, onClose }) => {
+    if (!isOpen || !book) return null;
+
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="flex items-center justify-center min-h-screen px-4">
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={onClose} />
+          
+          <div className="relative bg-white rounded-lg max-w-md w-full p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Edit Book</h2>
+            
+            <form onSubmit={handleUpdateBook} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Title *
+                </label>
+                <input
+                  type="text"
+                  value={editFormData.title}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, title: e.target.value }))}
+                  className="input"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Author *
+                </label>
+                <input
+                  type="text"
+                  value={editFormData.author}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, author: e.target.value }))}
+                  className="input"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Genre
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.genre}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, genre: e.target.value }))}
+                    className="input"
+                    placeholder="e.g. Fiction"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    ISBN
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.isbn}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, isbn: e.target.value }))}
+                    className="input"
+                    placeholder="e.g. 978-0-123456-78-9"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  value={editFormData.description}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
+                  className="input"
+                  rows={3}
+                  placeholder="Brief description of the book..."
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Total Copies *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={editFormData.availability.totalCopies}
+                    onChange={(e) => {
+                      const total = parseInt(e.target.value) || 1;
+                      setEditFormData(prev => ({ 
+                        ...prev, 
+                        availability: { 
+                          ...prev.availability, 
+                          totalCopies: total
+                        } 
+                      }));
+                    }}
+                    className="input"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Available Copies *
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max={editFormData.availability.totalCopies}
+                    value={editFormData.availability.availableCopies}
+                    onChange={(e) => setEditFormData(prev => ({ 
+                      ...prev, 
+                      availability: { 
+                        ...prev.availability, 
+                        availableCopies: parseInt(e.target.value) || 0 
+                      } 
+                    }))}
+                    className="input"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-2 mt-6">
+                <button type="button" onClick={onClose} className="btn-secondary">
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary">
+                  Update Book
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const Pagination = () => {
     if (totalPages <= 1) return null;
 
@@ -640,6 +851,16 @@ const Books = () => {
       <AddBookModal 
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
+      />
+
+      {/* Edit Book Modal */}
+      <EditBookModal 
+        book={selectedBook}
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedBook(null);
+        }}
       />
     </div>
   );

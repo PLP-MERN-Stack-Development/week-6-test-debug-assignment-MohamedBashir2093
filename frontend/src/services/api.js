@@ -66,6 +66,7 @@ export const transactionsAPI = {
     api.put(`/transactions/${id}/status`, { status, notes }),
   returnBook: (bookId, notes) => api.post('/transactions/return', { bookId, notes }),
   completeReturn: (id) => api.put(`/transactions/${id}/complete`),
+  deleteTransaction: (id) => api.delete(`/transactions/${id}`),
 };
 
 export default api; 

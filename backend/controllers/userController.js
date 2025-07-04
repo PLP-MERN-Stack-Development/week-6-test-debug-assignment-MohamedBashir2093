@@ -182,48 +182,23 @@ const deleteUser = async (req, res) => {
 // @access  Private (Admin)
 const getDashboardStats = async (req, res) => {
   try {
-    // Get total counts
-    const [totalUsers, totalBooks, totalTransactions] = await Promise.all([
-      User.countDocuments({ isActive: true }),
-      Book.countDocuments({ isActive: true }),
-      Transaction.countDocuments()
-    ]);
-
-    // Get pending requests
-    const pendingRequests = await Transaction.countDocuments({ 
-      status: 'pending' 
-    });
-
-    // Get active issues (approved transactions that haven't been returned)
-    const activeIssues = await Transaction.countDocuments({
-      status: 'approved',
-      returnedAt: { $exists: false }
-    });
-
-    // Get available books
-    const availableBooks = await Book.countDocuments({
-      isActive: true,
-      'availability.availableCopies': { $gt: 0 }
-    });
-
-    // Get recent transactions for activity feed
-    const recentTransactions = await Transaction.find()
-      .populate('user', 'firstName lastName')
-      .populate('book', 'title')
-      .sort({ createdAt: -1 })
-      .limit(5);
-
+    console.log('Dashboard stats endpoint hit');
+    
+    // Simplified version for debugging
+    const totalUsers = await User.countDocuments({ isActive: true });
+    console.log('Total users:', totalUsers);
+    
     res.json({
       totalUsers,
-      totalBooks,
-      totalTransactions,
-      pendingRequests,
-      activeIssues,
-      availableBooks,
-      recentTransactions
+      totalBooks: 0,
+      totalTransactions: 0,
+      pendingRequests: 0,
+      activeIssues: 0,
+      availableBooks: 0,
+      recentTransactions: []
     });
   } catch (error) {
-    console.error(error);
+    console.error('Dashboard stats error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

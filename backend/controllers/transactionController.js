@@ -2,14 +2,19 @@ const Transaction = require('../models/Transaction');
 const Book = require('../models/Book');
 const User = require('../models/User');
 
-// @desc    Get all transactions (Admin only)
+// @desc    Get all transactions (Admin) or user's own transactions (User)
 // @route   GET /api/transactions
-// @access  Private (Admin)
+// @access  Private
 const getTransactions = async (req, res) => {
   try {
     const { page = 1, limit = 10, status, type } = req.query;
     
     let query = {};
+    
+    // Users can only see their own transactions, admins see all
+    if (req.user.role !== 'admin') {
+      query.user = req.user._id;
+    }
     
     if (status) query.status = status;
     if (type) query.type = type;
@@ -259,11 +264,38 @@ const completeReturn = async (req, res) => {
   }
 };
 
+// @desc    Delete transaction (Admin only)
+// @route   DELETE /api/transactions/:id
+// @access  Private (Admin)
+const deleteTransaction = async (req, res) => {
+  try {
+    const transaction = await Transaction.findById(req.params.id);
+    
+    if (!transaction) {
+      return res.status(404).json({ message: 'Transaction not found' });
+    }
+    
+    // Check if it's an active issue transaction
+    if (transaction.type === 'issue' && transaction.status === 'approved' && !transaction.returnedAt) {
+      return res.status(400).json({ 
+        message: 'Cannot delete active issue transaction. Please complete return first.' 
+      });
+    }
+    
+    await Transaction.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Transaction deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   getTransactions,
   getTransaction,
   requestBook,
   updateTransactionStatus,
   returnBook,
-  completeReturn
+  completeReturn,
+  deleteTransaction
 }; 

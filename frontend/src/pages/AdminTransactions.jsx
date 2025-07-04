@@ -12,7 +12,8 @@ import {
   XCircle,
   AlertCircle,
   Eye,
-  MoreVertical
+  MoreVertical,
+  Trash2
 } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
@@ -66,6 +67,19 @@ const AdminTransactions = () => {
     } catch (error) {
       const message = error.response?.data?.message || 'Failed to update transaction';
       toast.error(message);
+    }
+  };
+
+  const handleDeleteTransaction = async (transaction) => {
+    if (window.confirm(`Are you sure you want to delete this ${transaction.type} transaction for "${transaction.book?.title}"? This action cannot be undone.`)) {
+      try {
+        await transactionsAPI.deleteTransaction(transaction._id);
+        toast.success('Transaction deleted successfully');
+        fetchTransactions();
+      } catch (error) {
+        const message = error.response?.data?.message || 'Failed to delete transaction';
+        toast.error(message);
+      }
     }
   };
 
@@ -211,6 +225,16 @@ const AdminTransactions = () => {
                   >
                     <Eye className="h-4 w-4" />
                     <span>View Details</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleDeleteTransaction(transaction);
+                      setShowDropdown(false);
+                    }}
+                    className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span>Delete Transaction</span>
                   </button>
                 </div>
               </div>
