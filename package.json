@@ -9,7 +9,11 @@
     "dev:backend": "cd backend && npm start",
     "dev:frontend": "cd frontend && npm run dev",
     "build": "cd frontend && npm run build",
-    "start": "cd backend && npm start"
+    "start": "cd backend && npm start",
+    "test": "npm run test --prefix backend",
+    "test:unit": "npm run test --prefix backend",
+    "test:integration": "npm run test --prefix backend",
+    "test:e2e": "npx cypress open"
   },
   "keywords": [
     "library",
@@ -29,4 +33,4 @@
   "engines": {
     "node": ">=14.0.0"
   }
-} 
+}
